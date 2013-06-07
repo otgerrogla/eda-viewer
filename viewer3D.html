@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <title>Viewer 3D</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <link rel="stylesheet" type="text/css" href="viewer3D.css">
+  </head>
+
+  <body>
+
+    <div id="Overlay">
+      <div id="Loading">
+        <p>Loading...</p>
+        <div>
+          <div id="Loading_1G"></div><div id="Loading_2G"></div><div id="Loading_3G"></div><div id="Loading_4G"></div>
+          <div id="Loading_5G"></div><div id="Loading_6G"></div><div id="Loading_7G"></div><div id="Loading_8G"></div>
+        </div>
+      </div>
+      <div id="Upload">
+        <div id="Logo"><img src="img/logo-br.png" alt="Battle Royale" /><span class="outlined alt-font">ALL-STARS</span></div>
+        <p>Select a game file to load:</p>
+        <input type="file" id="File"/>
+      </div>
+      <div id="Error">
+        <h1></h1>
+        <p><img src="img/sign-red.png" alt="ERROR"/></p>
+        <p></p>
+      </div>
+    </div>
+
+    <div class="wrapper">
+      <div>
+        <button id="PlayPause">Play</button>
+        <div id="Round"><div class="progress"></div><span class="outlined"></span><div></div></div>
+        <button id="Stop">Reset</button>
+        <div id="Narration" class="outlined"></div>
+      </div>
+      <canvas id="Canvas" width="800" height="600">Canvas not supported!</canvas>
+    </div>
+
+    <div class="info" id="Players"></div>
+
+
+    <!-- JAVASCRIPT -->
+
+    <script type="text/javascript" src="js/utils.js"></script>
+    <script type="text/javascript" src="js/glMatrix-0.9.5.min.js"></script>
+    <script type="text/javascript" src="js/obj.js"></script>
+    <script type="text/javascript" src="js/3D.js"></script>
+    <script type="text/javascript" src="js/viewer.js"></script>
+
+    <script type="text/javascript" src="js/assets.js"></script>
+
+    <script type="text/javascript" src="js/games/battleroyale.js"></script>
+
+    <!-- SHADERS -->
+
+    <script type="text/x-vertex-shader" id="shader-f-vs">
+      uniform mat4 ModelView;
+      uniform mat3 NormalMatrix;
+      uniform mat4 Projection;
+
+      attribute vec3 pos;
+      attribute vec3 normal;
+
+      varying vec3 N;
+
+      void main() {
+        gl_Position = Projection * ModelView * vec4(pos, 1.0);
+        N = normalize(NormalMatrix * normal);
+      }
+    </script>
+
+    <script type="text/x-fragment-shader" id="shader-f-fs">
+      precision mediump float;
+
+      uniform vec3 Sun;
+      uniform vec3 Color;
+
+      varying vec3 N;
+
+      void main() {
+        float d = 0.25 + 0.75*max(dot(N, -Sun), 0.0);
+        gl_FragColor = vec4(Color*d, 1.0);
+      }
+    </script>
+
+
+    <script type="text/x-vertex-shader" id="shader-v-vs">
+      uniform mat4 ModelView;
+      uniform mat3 NormalMatrix;
+      uniform mat4 Projection;
+
+      uniform vec3 Sun;
+      uniform vec3 Color;
+
+      attribute vec3 pos;
+      attribute vec3 normal;
+
+      varying vec3 color;
+
+      void main() {
+        gl_Position = Projection * ModelView * vec4(pos, 1.0);
+        float d = 0.25 + 0.75*max(dot(normalize(NormalMatrix * normal), -Sun), 0.0);
+        color = Color*d;
+      }
+    </script>
+
+    <script type="text/x-fragment-shader" id="shader-v-fs">
+      precision mediump float;
+
+      varying vec3 color;
+
+      void main() {
+        gl_FragColor = vec4(color, 1.0);
+      }
+    </script>
+
+
+    <script type="text/x-vertex-shader" id="shader-vtex-vs">
+      uniform mat4 ModelView;
+      uniform mat3 NormalMatrix;
+      uniform mat4 Projection;
+
+      uniform vec3 Sun;
+      uniform vec3 Color;
+
+      attribute vec3 pos;
+      attribute vec3 normal;
+      attribute vec2 texCoord;
+
+      varying vec3 color;
+      varying vec2 texCoordF;
+
+      void main() {
+        gl_Position = Projection * ModelView * vec4(pos, 1.0);
+        texCoordF = texCoord;
+        float d = 0.25 + 0.75*max(dot(normalize(NormalMatrix * normal), -Sun), 0.0);
+        color = Color * d;
+      }
+    </script>
+
+    <script type="text/x-fragment-shader" id="shader-vtex-fs">
+      precision mediump float;
+
+      uniform sampler2D textureMap;
+
+      varying vec3 color;
+      varying vec2 texCoordF;
+
+      void main() {
+        gl_FragColor = vec4(color, 1.0) * texture2D(textureMap, texCoordF);
+      }
+    </script>
+
+  </body>
+
+</html>
