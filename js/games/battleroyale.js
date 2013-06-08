@@ -82,7 +82,8 @@ function BattleRoyale(args, lines) {
       while (lines[l++] != "-1"); // Skip actions
     }
     
-    if (lines[l++] != "movements") throw "Parse error: expecting 'movements' on line " + l;
+    do { v = lines[l++] } while (v == "");
+    if (v != "movements") throw "Parse error: expecting 'movements' on line " + l;
     while (true) {
       var parts = lines[l++].split(" ");
       var id = parseInt(parts[0]);
