@@ -25,6 +25,7 @@ function BattleRoyale(args, lines) {
       case "damage_max": this.damageMax = parseInt(v); break;
       case "rows": this.rows = parseInt(v); break;
       case "cols": this.cols = parseInt(v); break;
+      //case "secgame": this.secgame = (v=="true"); break;
       case "names": this.names = [parts[1], parts[2], parts[3], parts[4]]; break;
     }
   }
@@ -82,7 +83,8 @@ function BattleRoyale(args, lines) {
       while (lines[l++] != "-1"); // Skip actions
     }
     
-    if (lines[l++] != "movements") throw "Parse error: expecting 'movements' on line " + l;
+    do { v = lines[l++] } while (v == "");
+    if (v != "movements") throw "Parse error: expecting 'movements' on line " + l;
     while (true) {
       var parts = lines[l++].split(" ");
       var id = parseInt(parts[0]);
