@@ -12,8 +12,11 @@ var Viewer = {
   game: null,
   
   speed: 3.0, // Turns per second
-  msPerFrame: 16, // Milliseconds between updates
-  interval: null,
+  // msPerFrame: 16, // Milliseconds between updates
+  
+  lastTick: 0,
+  lastRender: 0,
+  nextTick: null,
   
   playing: true,
   
@@ -218,10 +221,15 @@ var Viewer = {
     if (this.music) this.music.play();
 
     this.tick();
-    this.interval = setInterval("Viewer.tick()", this.msPerFrame);
   },
   
-  tick: function() {
+  tickCallback: function(t) { Viewer.tick(t); },
+
+  tick: function(t) {
+    var dt = this.lastTick? t - this.lastTick : 0;
+    if (isNaN(t)) this.lastTick = 0;
+    else this.lastTick = t;
+  
     // Update info
     var r = Math.max(0, Math.min(this.game.nRounds, Math.floor(this.time)));
     this.divRound.childNodes[1].textContent = r + " / " + this.game.nRounds;
@@ -261,7 +269,10 @@ var Viewer = {
     this.theme.H = this.canvas.height;
     this.theme.render(this.game, this.time);
     
-    if (this.playing) this.time += this.msPerFrame * this.speed / 1000;
+    if (this.playing) this.time += dt * this.speed / 1000;
+    
+    // Schedule next tick
+    this.nextTick = window.requestAnimationFrame(this.tickCallback);
   },
   
   resized: function() {

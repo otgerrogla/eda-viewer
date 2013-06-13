@@ -1,6 +1,32 @@
 "use strict";
 
-if (localStorage === undefined) localStorage = {};
+// Polyfill for "localStorage"
+//if (localStorage === undefined) localStorage = {};
+
+// Polyfill for "requestAnimationFrame"
+(function() {
+  var lastTime = 0;
+  var vendors = ['webkit', 'moz', 'ms', 'o'];
+  for (var i = 0; i < vendors.length && !window.requestAnimationFrame; ++i) {
+    window.requestAnimationFrame = window[vendors[i] + 'RequestAnimationFrame'];
+    window.cancelAnimationFrame = window[vendors[i] + 'CancelAnimationFrame']
+                               || window[vendors[i] + 'CancelRequestAnimationFrame'];
+  }
+  
+  if (!window.requestAnimationFrame) {
+    window.requestAnimationFrame = function(callback) {
+      var t = (new Date()).getTime();
+      var delay = Math.max(16 - (t - lastTime), 0);
+      lastTime = t + delay;
+      return window.setTimeout(function() { callback(t + delay); }, delay);
+    };
+  }
+  
+  if (!window.cancelAnimationFrame) {
+    window.cancelAnimationFrame = function(id) { clearTimeout(id); };
+  }
+
+}());
 
 function $(id) { return document.getElementById(id); }
 
@@ -71,7 +97,7 @@ function ajaxGet(url, callback) {
   }
   
   xmlHttp.onreadystatechange = function() {
-    if (xmlHttp.readyState == 4 && xmlHttp.status != 0) {
+    if (xmlHttp.readyState == 4 && xmlHttp.responseText) {
       callback(xmlHttp.responseText);
     }
   }
